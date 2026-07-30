@@ -9,4 +9,4 @@ binding = "ASSETS"
 [[d1_databases]]
 binding = "DB"
 database_name = "nobishiro-shindan-db"
-database_id = "REPLACE_WITH_D1_DATABASE_ID"
+database_id = "57f0e037-1ee0-4256-b019-acbda31f6e66"
