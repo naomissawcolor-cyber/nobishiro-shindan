@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>服選び"伸びしろ"診断</title>
+<style>
+  :root {
+    --ink: #4A3B32;
+    --ink-soft: #A9888F;
+    --ink-mid: #8A6A63;
+    --paper: #FDF6F4;
+    --paper-raised: #FCEFF0;
+    --swatch-bg: #FFFFFF;
+    --line: rgba(74, 59, 50, 0.13);
+    --line-strong: rgba(74, 59, 50, 0.26);
+    --accent: #C6577A;
+    --accent-soft: rgba(198, 87, 122, 0.11);
+    --axis-similar: #C6577A;
+    --axis-suki: #A6685F;
+    --axis-tpo: #4A3B32;
+    --shadow: rgba(74, 59, 50, 0.12);
+    --brand-brown: #4A3B32;
+    --accent-deep: #A94363;
+    color-scheme: light;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "游ゴシック体", "Yu Gothic", "Hiragino Sans", "Noto Sans JP", sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: clamp(20px, 5vw, 64px) 20px;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+
+  .stage {
+    width: 100%;
+    max-width: 640px;
+  }
+
+  .hero {
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+    background: var(--accent);
+    border-radius: 14px;
+    padding: 30px 20px;
+    margin-bottom: 40px;
+  }
+  .hero-deco {
+    position: absolute;
+    border-radius: 50%;
+    opacity: .16;
+    pointer-events: none;
+  }
+  .hero-deco-1 { width: 170px; height: 170px; background: #fff; top: -60px; left: -50px; }
+  .hero-deco-2 { width: 120px; height: 120px; background: var(--brand-brown); bottom: -40px; right: -30px; }
+
+  .hero .label {
+    position: relative;
+    z-index: 1;
+    display: inline-block;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.85);
+    border: 1px solid rgba(255,255,255,.5);
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+  }
+
+  .hero .mark {
+    position: relative;
+    z-index: 1;
+    display: block;
+    font-family: "游明朝", "Yu Mincho", "Hiragino Mincho ProN", serif;
+    font-size: 17px;
+    letter-spacing: 0.06em;
+    color: #fff;
+  }
+
+  h1.title {
+    font-family: "游明朝", "Yu Mincho", "Hiragino Mincho ProN", serif;
+    font-weight: 500;
+    font-size: clamp(28px, 6vw, 38px);
+    line-height: 1.4;
+    letter-spacing: 0.03em;
+    text-wrap: balance;
+    margin: 0 0 16px;
+  }
+
+  p.lede {
+    font-size: 15.5px;
+    line-height: 1.95;
+    letter-spacing: 0.01em;
+    color: var(--ink-mid);
+    max-width: 42ch;
+    margin: 0 auto 32px;
+    text-wrap: balance;
+  }
+
+  .progress-rail {
+    position: relative;
+    height: 1px;
+    background: var(--line);
+    margin-bottom: 8px;
+  }
+  .progress-fill {
+    position: absolute;
+    top: 0; left: 0; height: 1px;
+    background: var(--accent);
+    transition: width 0.5s cubic-bezier(.4,0,.2,1);
+  }
+  .progress-fill::after {
+    content: "";
+    position: absolute;
+    right: -3px; top: -3px;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--ink-soft);
+    margin-bottom: 36px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .q-num {
+    font-family: "游明朝", "Yu Mincho", "Hiragino Mincho ProN", serif;
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    margin-bottom: 10px;
+  }
+
+  .q-text {
+    font-family: "游明朝", "Yu Mincho", "Hiragino Mincho ProN", serif;
+    font-size: clamp(19px, 4vw, 23px);
+    line-height: 1.65;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    margin: 0 0 28px;
+    text-wrap: balance;
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 36px;
+  }
+
+  .option {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    text-align: left;
+    padding: 18px 20px;
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    color: var(--ink);
+    font-size: 15px;
+    line-height: 1.75;
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    font-family: inherit;
+    width: 100%;
+  }
+  .option:hover {
+    border-color: var(--line-strong);
+    box-shadow: 0 6px 18px var(--shadow);
+  }
+  .option:focus-visible {
+    outline: 1px solid var(--accent);
+    outline-offset: 3px;
+  }
+  .option.selected {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .option .tag {
+    flex-shrink: 0;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 1px solid var(--line-strong);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+  .option.selected .tag {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--paper-raised);
+  }
+
+  .nav-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  button.ghost {
+    background: none;
+    border: none;
+    color: var(--ink-soft);
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    padding: 8px 4px;
+    font-family: inherit;
+    visibility: hidden;
+  }
+  button.ghost.show { visibility: visible; }
+  button.ghost:hover { color: var(--ink); }
+
+  button.primary {
+    background: linear-gradient(135deg, var(--accent-deep), var(--accent));
+    color: #fff;
+    border: none;
+    padding: 13px 32px;
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    border-radius: 24px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: opacity 0.15s ease, box-shadow 0.2s ease, transform 0.1s ease;
+    opacity: 0.35;
+    pointer-events: none;
+  }
+  button.primary.ready { opacity: 1; pointer-events: auto; box-shadow: 0 4px 18px var(--shadow); }
+  button.primary:hover.ready { box-shadow: 0 8px 22px var(--shadow); transform: translateY(-1px); }
+  button.primary:active.ready { transform: translateY(0); }
+
+  /* イントロ画面 */
+  #screen-intro { text-align: center; }
+
+  .meta-line {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-bottom: 36px;
+    letter-spacing: 0.02em;
+  }
+  .meta-line span::before {
+    content: "・";
+    margin-right: 2px;
+  }
+
+  /* 結果画面 */
+  .result-card {
+    background: var(--swatch-bg);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 32px var(--shadow);
+    margin-bottom: 20px;
+  }
+  .result-top {
+    position: relative;
+    overflow: hidden;
+    background: var(--brand-brown);
+    padding: 32px 28px 28px;
+    text-align: center;
+  }
+  .result-top-deco {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    background: var(--accent);
+  }
+  .result-top-deco-1 { width: 180px; height: 180px; opacity: .18; top: -70px; right: -50px; }
+  .result-top-deco-2 { width: 130px; height: 130px; opacity: .14; bottom: -50px; left: -40px; }
+  .result-eyebrow {
+    position: relative;
+    z-index: 1;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.7);
+    margin-bottom: 14px;
+  }
+  .result-title {
+    position: relative;
+    z-index: 1;
+    font-family: "游明朝", "Yu Mincho", "Hiragino Mincho ProN", serif;
+    font-size: clamp(28px, 7vw, 40px);
+    line-height: 1.35;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: #fff;
+    margin: 0 0 10px;
+    text-wrap: balance;
+  }
+  .result-sub {
+    position: relative;
+    z-index: 1;
+    font-size: 13.5px;
+    color: rgba(255,255,255,.75);
+    letter-spacing: 0.03em;
+  }
+  .result-panel {
+    padding: 28px 28px 30px;
+  }
+  .result-body {
+    font-size: 15px;
+    line-height: 1.95;
+    margin-bottom: 8px;
+  }
+  .result-body + .result-body { margin-top: 14px; }
+  .result-section-label {
+    font-size: 11.5px;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    margin: 32px 0 12px;
+    text-transform: uppercase;
+  }
+
+  .bar-row {
+    display: grid;
+    grid-template-columns: 64px 1fr 32px;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    font-size: 13px;
+  }
+  .bar-track {
+    height: 8px;
+    background: var(--line);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .bar-fill {
+    display: block;
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.6s cubic-bezier(.4,0,.2,1);
+  }
+  .bar-count {
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-soft);
+    text-align: right;
+  }
+
+  .result-closing {
+    margin: 28px 0 8px;
+    padding: 16px 20px;
+    background: var(--accent-soft);
+    border-left: 2px solid var(--accent);
+    border-radius: 0 2px 2px 0;
+    font-size: 14px;
+    line-height: 1.9;
+    color: var(--ink);
+  }
+
+  .restart-row {
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  .restart-row button.primary {
+    opacity: 1; pointer-events: auto;
+    background: transparent; color: var(--ink);
+    border: 1px solid var(--line-strong);
+    transition: border-color 0.2s ease, color 0.2s ease;
+    flex-shrink: 0;
+  }
+  .restart-row button.primary:hover { border-color: var(--accent); color: var(--accent); box-shadow: none; transform: none; }
+
+  .share-hint {
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+
+  .screen { display: none; }
+  .screen.active { display: block; animation: fadeIn 0.35s ease; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .screen.active { animation: none; }
+    .option, .progress-fill, .bar-fill, button.primary { transition: none; }
+  }
+
+  @media (max-width: 420px) {
+    .bar-row { grid-template-columns: 52px 1fr 28px; font-size: 12px; }
+    .restart-row { flex-direction: column-reverse; align-items: stretch; }
+    .restart-row button.primary { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="hero">
+    <div class="hero-deco hero-deco-1"></div>
+    <div class="hero-deco hero-deco-2"></div>
+    <span class="label">Growth Check</span>
+    <span class="mark">伸びしろ診断</span>
+  </div>
+
+  <!-- イントロ -->
+  <section class="screen active" id="screen-intro">
+    <h1 class="title">あなたの服選び<br>&ldquo;伸びしろ&rdquo;診断</h1>
+
+    <p class="lede">9つの質問に答えるだけで、<br>あなたの服選びの伸びしろタイプがわかります。<br>今のあなたに一番必要な、<br>次の一歩のヒントもお届けします。</p>
+
+    <div class="meta-line">
+      <span>全9問</span>
+      <span>はい・いいえで回答</span>
+      <span>所要時間 約1分</span>
+    </div>
+
+    <button class="primary ready" onclick="startQuiz()">診断をはじめる</button>
+  </section>
+
+  <!-- 設問 -->
+  <section class="screen" id="screen-quiz">
+    <div class="progress-rail"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="progress-label">
+      <span id="progressText">Q1 / 9</span>
+      <span id="progressPercent">0%</span>
+    </div>
+
+    <div class="q-num" id="qNum">問 1</div>
+    <h2 class="q-text" id="qText"></h2>
+    <div class="options" id="qOptions"></div>
+
+    <div class="nav-row">
+      <button class="ghost" id="backBtn" onclick="goBack()">← 前の質問</button>
+      <button class="primary" id="nextBtn" onclick="goNext()">次へ</button>
+    </div>
+  </section>
+
+  <!-- 結果 -->
+  <section class="screen" id="screen-result">
+    <div class="result-card">
+      <div class="result-top">
+        <div class="result-top-deco result-top-deco-1"></div>
+        <div class="result-top-deco result-top-deco-2"></div>
+        <div class="result-eyebrow" id="resultEyebrow">診断結果</div>
+        <h1 class="result-title" id="resultTitle"></h1>
+        <p class="result-sub" id="resultSub"></p>
+      </div>
+      <div class="result-panel">
+        <div id="resultBodyWrap"></div>
+
+        <div class="result-section-label">3軸の内訳</div>
+        <div id="barChart"></div>
+
+        <p class="result-closing">その伸びしろを、クローゼットから一緒に見つけていくのが5daysチャレンジです。</p>
+      </div>
+    </div>
+
+    <div class="restart-row">
+      <span class="share-hint">この画面をスクショして、シェアしてね</span>
+      <button class="primary" onclick="restartQuiz()">もう一度診断する</button>
+    </div>
+  </section>
+</div>
+
+<script>
+  const AXES = ['similar', 'suki', 'tpo'];
+  const AXIS_LABELS = { similar: '似合う', suki: '好き', tpo: 'TPO' };
+  const AXIS_COLORS = { similar: 'var(--axis-similar)', suki: 'var(--axis-suki)', tpo: 'var(--axis-tpo)' };
+
+  const TYPES = {
+    jikoryu: {
+      title: '自己流タイプ',
+      comment: '好きなものはもうちゃんとある人。あとは"なぜ似合うのか"を知るだけで、選ぶ自信がぐっと変わりますよ。',
+    },
+    yutosei: {
+      title: '優等生タイプ',
+      comment: '似合う基準はもうしっかりある人。あとは"好き"を思い出すだけで、クローゼットがもっと自分らしくなります。',
+    },
+    itten: {
+      title: '一点集中タイプ',
+      comment: '自分のことはよくわかっている人。あとはシーンごとの引き出しを増やすだけで、毎日の服選びがもっとラクになります。',
+    },
+    jikoryu_yutosei: {
+      title: '自己流×優等生タイプ',
+      comment: 'シーンに合わせる力はすでにある人。あとは"似合う"と"好き"、両方の軸を育てていく段階です。',
+    },
+    jikoryu_itten: {
+      title: '自己流×一点集中タイプ',
+      comment: '好きなものははっきりしている人。あとは"似合う"と"シーンでの使い分け"を整えていきましょう。',
+    },
+    yutosei_itten: {
+      title: '優等生×一点集中タイプ',
+      comment: '似合うものは選べる人。あとは"好き"と"シーンでの引き出し"を増やしていく段階です。',
+    },
+    jikoryu_yutosei_itten: {
+      title: '自己流×優等生×一点集中タイプ',
+      comment: '基準づくりはこれからが本番。3つの軸、どこから育てても大丈夫です。',
+    },
+    allround: {
+      title: 'オールラウンド基準タイプ',
+      comment: 'もう十分に基準ができている人。ここからは、その基準をもっと言葉にして、周りにも伝えていく段階です。',
+    },
+  };
+
+  const QUESTIONS = [
+    { text: 'パーソナルカラーを知っていて、似合う色が選べる', axis: 'similar' },
+    { text: '自分の好きなテイストがはっきりわかっている', axis: 'suki' },
+    { text: '行く場所で選べる服を持っている（ママ友とのランチ会・ちょっといいお店）', axis: 'tpo' },
+    { text: '骨格タイプを知っていて、スタイルがよく見える服が選べる', axis: 'similar' },
+    { text: 'クローゼットを見て、好きな服が多いと感じる', axis: 'suki' },
+    { text: '会う人に合わせて服を選べている', axis: 'tpo' },
+    { text: '顔タイプを知っていて、似合うテイストのブランドが選べる', axis: 'similar' },
+    { text: '好きなブランドのお店が2つ以上ある', axis: 'suki' },
+    { text: 'クローゼットを開けて、5秒で「今日はコレ」と選べる', axis: 'tpo' },
+  ];
+
+  function determineType(similar, suki, tpo) {
+    const total = similar + suki + tpo;
+    if (total === 9) return 'allround';
+    const scores = { similar, suki, tpo };
+    const min = Math.min(similar, suki, tpo);
+    const minAxes = AXES.filter((k) => scores[k] === min);
+    if (minAxes.length === 1) {
+      if (minAxes[0] === 'similar') return 'jikoryu';
+      if (minAxes[0] === 'suki') return 'yutosei';
+      return 'itten';
+    }
+    if (minAxes.length === 2) {
+      const set = minAxes.join(',');
+      if (set === 'similar,suki') return 'jikoryu_yutosei';
+      if (set === 'similar,tpo') return 'jikoryu_itten';
+      return 'yutosei_itten';
+    }
+    return 'jikoryu_yutosei_itten';
+  }
+
+  let current = 0;
+  const answers = new Array(QUESTIONS.length).fill(null);
+
+  function startQuiz() {
+    show('screen-quiz');
+    renderQuestion();
+  }
+
+  function show(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function renderQuestion() {
+    const q = QUESTIONS[current];
+    document.getElementById('qNum').textContent = '問 ' + (current + 1);
+    document.getElementById('qText').textContent = q.text;
+    document.getElementById('progressText').textContent = 'Q' + (current + 1) + ' / ' + QUESTIONS.length;
+    const pct = Math.round((current) / QUESTIONS.length * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressPercent').textContent = pct + '%';
+
+    const wrap = document.getElementById('qOptions');
+    wrap.innerHTML = '';
+    [{ v: 1, label: 'はい', tag: '○' }, { v: 0, label: 'いいえ', tag: '×' }].forEach((opt) => {
+      const btn = document.createElement('button');
+      btn.className = 'option' + (answers[current] === opt.v ? ' selected' : '');
+      btn.type = 'button';
+      btn.innerHTML = '<span class="tag">' + opt.tag + '</span><span>' + opt.label + '</span>';
+      btn.onclick = () => selectOption(opt.v);
+      wrap.appendChild(btn);
+    });
+
+    document.getElementById('backBtn').classList.toggle('show', current > 0);
+    updateNextState();
+  }
+
+  function selectOption(v) {
+    answers[current] = v;
+    renderQuestion();
+  }
+
+  function updateNextState() {
+    const nextBtn = document.getElementById('nextBtn');
+    nextBtn.textContent = current === QUESTIONS.length - 1 ? '結果を見る' : '次へ';
+    nextBtn.classList.toggle('ready', answers[current] !== null);
+  }
+
+  function goNext() {
+    if (answers[current] === null) return;
+    if (current < QUESTIONS.length - 1) {
+      current++;
+      renderQuestion();
+    } else {
+      showResult();
+    }
+  }
+
+  function goBack() {
+    if (current === 0) return;
+    current--;
+    renderQuestion();
+  }
+
+  function showResult() {
+    const scores = { similar: 0, suki: 0, tpo: 0 };
+    QUESTIONS.forEach((q, i) => { scores[q.axis] += answers[i]; });
+
+    const typeKey = determineType(scores.similar, scores.suki, scores.tpo);
+    const type = TYPES[typeKey];
+
+    fetch('/api/result', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ answers })
+    }).catch(() => {});
+
+    document.getElementById('progressFill').style.width = '100%';
+
+    document.getElementById('resultEyebrow').textContent = '診断結果';
+    document.getElementById('resultTitle').textContent = type.title;
+    document.getElementById('resultSub').textContent =
+      '似合う ' + scores.similar + '/3 ・ 好き ' + scores.suki + '/3 ・ TPO ' + scores.tpo + '/3';
+    document.getElementById('resultBodyWrap').innerHTML =
+      '<p class="result-body">' + type.comment + '</p>';
+
+    const barWrap = document.getElementById('barChart');
+    barWrap.innerHTML = '';
+    AXES.forEach((axis) => {
+      const score = scores[axis];
+      const row = document.createElement('div');
+      row.className = 'bar-row';
+      row.innerHTML =
+        '<span class="bar-label">' + AXIS_LABELS[axis] + '</span>' +
+        '<span class="bar-track"><span class="bar-fill" style="width:' + (score / 3 * 100) + '%; background:' + AXIS_COLORS[axis] + '"></span></span>' +
+        '<span class="bar-count">' + score + '/3</span>';
+      barWrap.appendChild(row);
+    });
+
+    show('screen-result');
+  }
+
+  function restartQuiz() {
+    current = 0;
+    answers.fill(null);
+    show('screen-intro');
+  }
+</script>
+</body>
+</html>
