@@ -8,7 +8,7 @@ const TYPE_LABELS = {
   jikoryu_yutosei: '自己流×優等生タイプ',
   jikoryu_itten: '自己流×一点集中タイプ',
   yutosei_itten: '優等生×一点集中タイプ',
-  jikoryu_yutosei_itten: '自己流×優等生×一点集中タイプ',
+  jikoryu_yutosei_itten: '伸びしろ無限大タイプ',
   allround: 'オールラウンド基準タイプ',
 };
 
